@@ -1,33 +1,11 @@
-/*
-
- TFT Pong
-
- This example for the Arduino screen reads the values
- of 2 potentiometers to move a rectangular platform
- on the x and y axes. The platform can intersect
- with a ball causing it to bounce.
-
- This example code is in the public domain.
-
- Created by Tom Igoe December 2012
- Modified 15 April 2013 by Scott Fitzgerald
-
- http://www.arduino.cc/en/Tutorial/TFTPong
-
- */
-
-#include <TFT.h>  // Arduino LCD library
+// Arduino LCD library
+#include <TFT.h>  
 #include <SPI.h>
 
 // pin definition for the Uno
 #define cs   10
 #define dc   9
 #define rst  8
-
-// pin definition for the Leonardo
-// #define cs   7
-// #define dc   0
-// #define rst  1
 
 TFT TFTscreen = TFT(cs, dc, rst);
 
@@ -40,7 +18,11 @@ int ballDirectionY = 1;
 
 int ballSpeed = 10; // lower numbers are faster
 
-int ballX, ballY, oldBallX, oldBallY;
+int ballX, ballY, oldBallX, oldBallY;  
+
+// save the width and height of the screen
+int tftWidth = TFTscreen.width();
+int tftHeight = TFTscreen.height();
 
 void setup() {
   // initialize the display
@@ -51,13 +33,9 @@ void setup() {
 
 void loop() {
 
-  // save the width and height of the screen
-  int myWidth = TFTscreen.width();
-  int myHeight = TFTscreen.height();
-
   // map the paddle's location to the position of the potentiometers
-  paddleX = map(analogRead(A0), 512, -512, 0, myWidth) - 20 / 2;
-  paddleY = map(analogRead(A1), 512, -512, 0, myHeight) - 5 / 2;
+  paddleX = map(analogRead(A0), 0, 1023, 0, tftWidth) - 20 / 2;
+  paddleY = map(analogRead(A1), 0, 1023, 0, tftHeight) - 5 / 2;
 
   // set the fill color to black and erase the previous
   // position of the paddle if different from present
