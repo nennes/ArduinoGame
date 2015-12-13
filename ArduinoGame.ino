@@ -10,6 +10,7 @@
 // game variables
 #define PADDLE_WIDTH  30
 #define PADDLE_HEIGHT 5
+#define BALL_SIZE 5
 #define DEBUG_PORT 7
 #define PADDLE_STEP 2
 #define BALL_SPEED 5
@@ -112,13 +113,13 @@ void moveBall() {
   TFTscreen.fill(0, 0, 0);
 
   if (oldBallX != ballX || oldBallY != ballY) {
-    TFTscreen.rect(oldBallX, oldBallY, 5, 5);
+    TFTscreen.rect(oldBallX, oldBallY, BALL_SIZE, BALL_SIZE);
   }
 
 
   // draw the ball's current position
   TFTscreen.fill(255, 255, 255);
-  TFTscreen.rect(ballX, ballY, 5, 5);
+  TFTscreen.rect(ballX, ballY, BALL_SIZE, BALL_SIZE);
 
   oldBallX = ballX;
   oldBallY = ballY;
@@ -130,8 +131,8 @@ void moveBall() {
 boolean inPaddle(int x, int y, int rectX, int rectY, int rectWidth, int rectHeight) {
   boolean result = false;
 
-  if ((x >= rectX && x <= (rectX + rectWidth)) &&
-      (y >= rectY && y <= (rectY + rectHeight))) {
+  if ((x >= (rectX - BALL_SIZE) && x <= (rectX + rectWidth)) &&
+      (y >= (rectY - BALL_SIZE) && y <= (rectY + rectHeight))) {
     result = true;
   }
 
