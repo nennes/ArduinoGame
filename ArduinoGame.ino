@@ -7,16 +7,25 @@
 #define dc   9
 #define rst  8
 
+// game variables
+#define PADDLE_WIDTH  30
+#define PADDLE_HEIGHT 5
+#define DEBUG_PORT 7
+#define PADDLE_STEP 2
+#define BALL_SPEED 5
+#define DELAY_MS 5
+
 TFT TFTscreen = TFT(cs, dc, rst);
 
 // variables for the position of the ball and paddle
 int paddleX = 0;
 int paddleY = 0;
+int newPaddleX = 0;
+int newPaddleY = 0;
 int oldPaddleX, oldPaddleY;
 int ballDirectionX = 1;
 int ballDirectionY = 1;
 
-int ballSpeed = 10; // lower numbers are faster
 
 int ballX, ballY, oldBallX, oldBallY;  
 
@@ -27,36 +36,55 @@ int tftHeight = TFTscreen.height();
 void setup() {
   // initialize the display
   TFTscreen.begin();
+  Serial.begin(9600);
   // black background
   TFTscreen.background(0, 0, 0);
+
+  // Initial paddle's location to the center of the screen
+  paddleX = (tftWidth/2) - PADDLE_WIDTH/2;
+  paddleY = (tftHeight/2) - PADDLE_HEIGHT/2;
 }
 
 void loop() {
 
-  // map the paddle's location to the position of the potentiometers
-  paddleX = map(analogRead(A0), 0, 1023, 0, tftWidth) - 20 / 2;
-  paddleY = map(analogRead(A1), 0, 1023, 0, tftHeight) - 5 / 2;
+  // #update the current position
+  newPaddleX = paddleX + map(analogRead(A0), 0, 1023, -PADDLE_STEP, PADDLE_STEP);
+  if((newPaddleX >= - PADDLE_WIDTH/2) && (newPaddleX <= tftWidth - PADDLE_WIDTH/2)){
+    paddleX = newPaddleX;
+  }
+  newPaddleY = paddleY + map(analogRead(A1), 0, 1023, -PADDLE_STEP, PADDLE_STEP);
+  if((newPaddleY >= - PADDLE_HEIGHT/2) && (newPaddleY <= tftHeight - PADDLE_HEIGHT/2)){
+    paddleY = newPaddleY;
+  }
+
+  if (digitalRead(DEBUG_PORT) == LOW){
+    Serial.println(paddleX);
+    Serial.println(paddleY);
+  }
+    
 
   // set the fill color to black and erase the previous
   // position of the paddle if different from present
   TFTscreen.fill(0, 0, 0);
 
   if (oldPaddleX != paddleX || oldPaddleY != paddleY) {
-    TFTscreen.rect(oldPaddleX, oldPaddleY, 20, 5);
+    TFTscreen.rect(oldPaddleX, oldPaddleY, PADDLE_WIDTH, PADDLE_HEIGHT);
   }
 
   // draw the paddle on screen, save the current position
   // as the previous.
   TFTscreen.fill(255, 255, 255);
 
-  TFTscreen.rect(paddleX, paddleY, 20, 5);
+  TFTscreen.rect(paddleX, paddleY, PADDLE_WIDTH, PADDLE_HEIGHT);
   oldPaddleX = paddleX;
   oldPaddleY = paddleY;
 
   // update the ball's position and draw it on screen
-  if (millis() % ballSpeed < 2) {
+  if (millis() % BALL_SPEED < 2) {
     moveBall();
   }
+
+  delay(DELAY_MS);
 }
 
 // this function determines the ball's position on screen
@@ -71,7 +99,7 @@ void moveBall() {
   }
 
   // check if the ball and the paddle occupy the same space on screen
-  if (inPaddle(ballX, ballY, paddleX, paddleY, 20, 5)) {
+  if (inPaddle(ballX, ballY, paddleX, paddleY, PADDLE_WIDTH, PADDLE_HEIGHT)) {
     ballDirectionX = -ballDirectionX;
     ballDirectionY = -ballDirectionY;
   }
